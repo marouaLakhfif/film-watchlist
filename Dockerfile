@@ -31,37 +31,18 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+# Create SQLite database file if using SQLite
+RUN touch database/database.sqlite
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Use Apache's default port
+# Expose port
 EXPOSE 10000
 
 # Start Apache
 CMD ["apache2-foreground"]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
