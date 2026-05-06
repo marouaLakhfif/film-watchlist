@@ -1,68 +1,41 @@
 FROM php:8.2-apache
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip
+    git curl libpng-dev libonig-dev libxml2-dev zip unzip sqlite3
 
-# Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd pdo_sqlite
 
-# Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
-
-# Set DocumentRoot to the public directory
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
-# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
 COPY . .
 
-# Install PHP dependencies
+# Create SQLite database file and set permissions
+RUN touch database/database.sqlite && \
+    chmod 666 database/database.sqlite
+
+# Copy .env.example to .env if not exists
+RUN cp .env.example .env 2>/dev/null || true
+
+# Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Create SQLite database file if using SQLite
-RUN touch database/database.sqlite
+# Generate app key (but Render will override with env var)
+RUN php artisan key:generate --no-interaction
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Set wide permissions for storage and bootstrap cache
+RUN chown -R www-data:www-data storage bootstrap/cache database && \
+    chmod -R 775 storage bootstrap/cache database
 
-# Expose port
+USER www-data
+
 EXPOSE 10000
 
-# Start Apache
 CMD ["apache2-foreground"]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
