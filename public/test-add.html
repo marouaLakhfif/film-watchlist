@@ -1,0 +1,20 @@
+<?php session_start(); ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test POST</title>
+</head>
+<body>
+    <h1>Manual Add Test</h1>
+    <form method="POST" action="/movies">
+        <?php
+            // Generate a temporary CSRF token manually (only for test – remove later)
+            $token = bin2hex(random_bytes(32));
+            setcookie('XSRF-TOKEN', $token, time()+3600, '/');
+        ?>
+        <input type="hidden" name="_token" value="<?php echo $token; ?>">
+        <input type="text" name="title" value="Manual Test Movie">
+        <button type="submit">Add</button>
+    </form>
+</body>
+</html>
