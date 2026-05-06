@@ -19,6 +19,12 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Set DocumentRoot to the public directory
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
